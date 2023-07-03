@@ -1,6 +1,6 @@
 const { Client } = require("pg");
 
-
+/***** Connect to the `juicebox-dev` database ********/
 const client = new Client({
     user: 'postgres',
     host: 'localhost',
@@ -9,6 +9,7 @@ const client = new Client({
     port: 5433,
 })
 
+/***** User Functions ********/
 async function getAllUsers() {
     const { rows } = await client.query(`SELECT 
         id, 
@@ -62,6 +63,26 @@ async function updateUser(id, fields = {}) {
 
     }
 }
+/**** Posts Functions ****/
+async function createPosts({ authorID, title, content }) {
+  try {
+    const {
+      rows: [user],
+    } = await client.query(
+      `INSERT INTO users (username, password, name, location) VALUES ($1, $2, $3, $4)
+        ON CONFLICT (username) DO NOTHING
+        RETURNING id, username, name, location, active;
+        `,
+      [username, password, name, location]
+    );
+    return user;
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+/**** Export Functions *******/
 module.exports = {
   client,
   getAllUsers,

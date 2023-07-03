@@ -54,7 +54,7 @@ async function testDB() {
 async function dropTables() {
     try{
         console.log("starting to drop tables ...");
-        await client.query(`DROP TABLE IF EXISTS users;`)
+        await client.query(`DROP TABLE posts, users CASCADE;`);
         console.log("Finished dropping tables.");
 
     } catch (error) {
@@ -63,9 +63,9 @@ async function dropTables() {
     }
 }
 
-async function createTables() {
+async function createTableUsers() {
     try {
-        console.log("Creating table");
+        console.log("Creating 'user' table");
       await client.query(`
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
@@ -76,19 +76,39 @@ async function createTables() {
         active BOOLEAN DEFAULT true
       );
       `);
-      console.log("Finished creating table");
+      console.log("Finished creating 'user' table");
     } catch (error) {
-        console.error("Error creating tables!");
+        console.error("Error creating 'user'tables!");
         throw error;
     }
 } 
 
+async function createTablePosts() {
+  try {
+    console.log("**** - Creating 'posts' table - ****");
+    await client.query(`
+      CREATE TABLE posts (
+        id SERIAL PRIMARY KEY,
+        "authorID" INTEGER REFERENCES users(id) NOT NULL,
+        title varchar(255) NOT NULL,
+        content TEXT NOT NULL,
+        active BOOLEAN DEFAULT true
+      );
+      `);
+
+    console.log("**** - Finished creating 'posts' table - ****");
+  } catch (error) {
+    console.error("Error creating 'posts'tables!");
+    throw error;
+  }
+} 
 async function rebuildDB() {
     try {
         client.connect();
 
         await dropTables();
-        await createTables();
+        await createTableUsers();
+        await createTablePosts();
         await createInitialUsers();
     } catch (error) {
         console.error(error);
