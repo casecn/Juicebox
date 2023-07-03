@@ -1,11 +1,26 @@
-const { client, getAllUsers, createUser
-} = require("./index");
+const { client, getAllUsers, createUser, updateUser } = require("./index");
 
 async function createInitialUsers() {
     try{
         console.log("Starting to create users. . .");
 
-        const albert = await createUser({ username: 'albert', password: 'bertie99'});
+        const albert = await createUser ({
+            username: 'albert',
+            password: 'bertie99',
+            name: 'al Bert',
+            location: 'Sidney, Australia' });
+        const sandra = await createUser({
+            username: "sandra",
+            password: "kdiekkdi",
+            name: "Just Sandra",
+            location: "Ain't tellin",
+        });
+        const glamgal = await createUser({
+            username: "glamgal",
+            password: "kljsldfj",
+            name: "Jan",
+            location: "Upper East Side",
+        });
     } catch(error) {
         console.error("Error creating users!");
         throw error;
@@ -13,9 +28,17 @@ async function createInitialUsers() {
 }
 async function testDB() {
   try {
-    console.log("starting to test the database . . .")
+    console.log("#### - STARTING TO TEST THE DATABASE! - ####")
+    console.log("**** - Calling getAllusers - ****");
     const users = await getAllUsers();
-    console.log(users);
+    console.log("**** - Result:", users);
+
+    console.log("**** - Calling updateUser on users[0] - ****")
+    const updateUserResult = await updateUser(users[0].id, {
+        name: "newname Sogood",
+        location: "Lesterville, KY"
+    });
+    console.log("Result: ", updateUserResult);
     console.log("Finished testing the database . . .");
   } catch (error) {
         console.error("Error testing db");
@@ -47,7 +70,10 @@ async function createTables() {
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
         username varchar(255) UNIQUE NOT NULL,
-        password varchar(255) NOT NULL
+        password varchar(255) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        location VARCHAR(255) NOT NULL,
+        active BOOLEAN DEFAULT true
       );
       `);
       console.log("Finished creating table");
