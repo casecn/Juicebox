@@ -25,7 +25,7 @@ async function createUser({
     password, 
     name,
     location }) {
-        sql = `INSERT INTO users (username, password, name, location) VALUES ($1, $2, $3, $4)
+        let sql = `INSERT INTO users (username, password, name, location) VALUES ($1, $2, $3, $4)
         ON CONFLICT (username) DO NOTHING
         RETURNING id, username, name, location, active;
         `;
@@ -62,6 +62,8 @@ async function updateUser(id, fields = {}) {
 
     }
 }
+
+
 /**** Posts Functions ****/
 async function createPosts({ authorID, title, content }) {
     //console.log("AuthorID:", authorID, "Title:", title, "Content:", content)
@@ -96,7 +98,7 @@ async function updatePost(id, fields = {}) {
         return;
     }
 
-  sql = `
+  let sql = `
         UPDATE posts
         SET ${setString}
         WHERE id=${id}
@@ -115,23 +117,58 @@ async function updatePost(id, fields = {}) {
 
 async function getPostsByUser(userID) {
     console.log("Posts by User #", userID)
-  sql = `
-        SELECT * FROM posts WHERE "authorID" = $1;`
-  try {
-    const {rows } = await client.query(sql, [userID]);
+    console.log(typeof userID)
+  let sql = `SELECT * FROM posts WHERE "authorID" = $1`
 
+  try {
+    const { rows } = await client.query(sql, [userID]);
+    console.log({ rows, line: 125 })
+    if (!rows.length) {
+      //  console.log({rows, line: 125});
+        return null
+    }
+    //console.log({rows, line: 129})
     return rows;
   } catch (error) {
+    console.error(error);
     throw error;
   }
 }
 
+async function getUserbyID(userID) {
+  console.log("Get User Info by User ID", userID);
+  let sql = `
+        SELECT * FROM users WHERE id = $1;`;
+  try {
+    const {rows: [users]} = await client.query(sql, [userID]);
+
+  console.log({ users, line: 144, userID, id: users.id});
+    if (users){
+        console.log({ users, line: 146 })
+        //delete the 'password' key
+        delete users.password;        
+        //Get posts4
+        console.log("UserID:", userID);        
+        const userPosts = await getPostsByUser(userID);
+        // add posts to user objects
+        console.log("userPosts: ", userPosts)
+        users.posts = userPosts; 
+        return users;
+     }
+    else {
+         return null;
+    }
+} catch (error) {
+     throw error;
+   }
+}
 /**** Export Functions *******/
 module.exports = {
   client,
   getAllUsers,
   createUser,
   updateUser,
+  getUserbyID,
   createPosts,
   updatePost,
   getAllposts,

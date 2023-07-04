@@ -3,6 +3,7 @@ const {
   getAllUsers,
   createUser,
   updateUser,
+  getUserbyID,
   createPosts,
   updatePost,
   getAllposts,
@@ -53,6 +54,11 @@ async function testUsers() {
         location: "Lesterville, KY"
     });
     console.log("updateUser Results: ", updateUserResult);
+
+    console.log("4.4 - Getting user data including posts");
+
+    const userData = await getUserbyID(1);
+    console.log("User Data:", userData);
     console.log("####- Finished Testing User Functions - #####");
   } catch (error) {
         console.error("Error testing db");
@@ -79,7 +85,7 @@ async function testPosts() {
   console.log("updatePosts Result:", updatePostResult);
   console.log("5.4 - Retrieving all posts by user with id #2 from index.js");
   const userPosts = await getPostsByUser(2);
-  console.log("Posts by User #1:", userPosts)
+  console.log("Posts by User #2:", userPosts)
     console.log("####- Finished Testing Post Functions - #####");
   } catch (error) {
     console.error("Error testing db");
