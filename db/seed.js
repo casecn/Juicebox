@@ -41,7 +41,7 @@ async function createInitialUsers() {
 async function testUsers() {
   try {
     console.log("4.  Testing User Functions")
-    await createInitialUsers();
+
     console.log("4.2 - Calling getAllusers from index.js");
     const users = await getAllUsers();
     console.log("#### - GetAllusers Result:", users);
@@ -67,7 +67,7 @@ async function testUsers() {
 async function testPosts() {
   try {
     console.log("5.  Testing Post Functions");
-    await createInitialPosts();
+    
     console.log("5.2 - Calling getAllposts from index.js");
     const posts = await getAllposts();
     console.log("GetAllposts Result:", posts);
@@ -173,6 +173,8 @@ async function rebuildDB() {
         await dropTables();
         await createTableUsers();
         await createTablePosts();
+        await createInitialUsers();
+        await createInitialPosts();
         
     } catch (error) {
         console.error(error);
@@ -181,9 +183,7 @@ async function rebuildDB() {
 }
 
 rebuildDB()
-    .then(testUsers)
-    .then(testPosts)
-    .catch(console.error)
-    .finally(() => {
-        client.end();
-        console.log("FINISHED!!!!!!!!!")});
+  .then(testUsers)
+  .then(testPosts)
+  .catch(console.error)
+  .finally(() => client.end());
