@@ -25,14 +25,14 @@ async function createUser({
     password, 
     name,
     location }) {
-    try {
-        const { rows: [ user ] } = await client.query(
-          `INSERT INTO users (username, password, name, location) VALUES ($1, $2, $3, $4)
+        sql = `INSERT INTO users (username, password, name, location) VALUES ($1, $2, $3, $4)
         ON CONFLICT (username) DO NOTHING
         RETURNING id, username, name, location, active;
-        `,
-          [username, password, name, location]
-        );
+        `;
+        data = [username, password, name, location];
+        //console.log(data);
+    try {
+        const { rows: [ user ] } = await client.query(sql, data);
         return user;
     } catch (error) {
         throw error;
@@ -45,7 +45,6 @@ async function updateUser(id, fields = {}) {
     if(setString.length === 0) { 
         return; 
     }
-
     try {
 
       const { rows: [user] } = await client.query(
@@ -65,22 +64,67 @@ async function updateUser(id, fields = {}) {
 }
 /**** Posts Functions ****/
 async function createPosts({ authorID, title, content }) {
-  try {
+    //console.log("AuthorID:", authorID, "Title:", title, "Content:", content)
+    const sql = 'INSERT INTO posts (\"authorID\", title, content) VALUES ($1, $2, $3) RETURNING *'
+    const data = [authorID, title, content]
+    //console.log(data);
+    try {
     const {
-      rows: [user],
-    } = await client.query(
-      `INSERT INTO users (username, password, name, location) VALUES ($1, $2, $3, $4)
-        ON CONFLICT (username) DO NOTHING
-        RETURNING id, username, name, location, active;
-        `,
-      [username, password, name, location]
-    );
-    return user;
+      rows: [posts],
+    } = await client.query(sql, data);
+    return posts;
   } catch (error) {
     throw error;
   }
 }
 
+async function getAllposts() {
+    const { rows } = await client.query(`SELECT * FROM posts;`);
+    return rows;
+}
+
+async function updatePost(id, fields = {}) {
+    let keyList = [];
+    const setString = Object.keys(fields)
+        .map((key, index, value) => {
+        let setString = `"${key}"=$${index + 1}`;
+        keyList.push(fields[key]);
+        return setString;
+        })
+        .join(", ");
+    if (setString.length === 0) {
+        return;
+    }
+
+  sql = `
+        UPDATE posts
+        SET ${setString}
+        WHERE id=${id}
+        RETURNING *;
+        `
+  try {
+    const {
+      rows: [post],
+    } = await client.query( sql, keyList); 
+ 
+    return post;
+  } catch (error) {
+    throw error;
+  }
+}
+
+async function getPostsByUser(userID) {
+    console.log("Posts by User #", userID)
+  sql = `
+        SELECT * FROM posts WHERE "authorID" = $1;`
+  try {
+    const {rows } = await client.query(sql, [userID]);
+
+    return rows;
+  } catch (error) {
+    throw error;
+  }
+}
 
 /**** Export Functions *******/
 module.exports = {
@@ -88,6 +132,10 @@ module.exports = {
   getAllUsers,
   createUser,
   updateUser,
+  createPosts,
+  updatePost,
+  getAllposts,
+  getPostsByUser,
 };
 
 

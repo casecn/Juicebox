@@ -1,8 +1,17 @@
-const { client, getAllUsers, createUser, updateUser } = require("./index");
+const {
+  client,
+  getAllUsers,
+  createUser,
+  updateUser,
+  createPosts,
+  updatePost,
+  getAllposts,
+  getPostsByUser,
+} = require("./index");
 
 async function createInitialUsers() {
     try{
-        console.log("Starting to create users. . .");
+        console.log("4.1 - Populating initial users ");
 
         const albert = await createUser ({
             username: 'albert',
@@ -15,47 +24,102 @@ async function createInitialUsers() {
             name: "Just Sandra",
             location: "Ain't tellin",
         });
+        
         const glamgal = await createUser({
             username: "glamgal",
             password: "kljsldfj",
             name: "Jan",
             location: "Upper East Side",
         });
+
+        console.log(glamgal);
+        console.log("#### - Finished Populating Users - ####")
     } catch(error) {
         console.error("Error creating users!");
         throw error;
     }
 }
-async function testDB() {
+async function testUsers() {
   try {
-    console.log("#### - STARTING TO TEST THE DATABASE! - ####")
-    console.log("**** - Calling getAllusers - ****");
+    console.log("4.  Testing User Functions")
+    await createInitialUsers();
+    console.log("4.2 - Calling getAllusers from index.js");
     const users = await getAllUsers();
-    console.log("**** - Result:", users);
+    console.log("#### - GetAllusers Result:", users);
 
-    console.log("**** - Calling updateUser on users[0] - ****")
+    console.log("4.3 - Calling updateUser (users[0]) from index.js")
     const updateUserResult = await updateUser(users[0].id, {
         name: "newname Sogood",
         location: "Lesterville, KY"
     });
-    console.log("Result: ", updateUserResult);
-    console.log("Finished testing the database . . .");
+    console.log("updateUser Results: ", updateUserResult);
+    console.log("####- Finished Testing User Functions - #####");
   } catch (error) {
         console.error("Error testing db");
         throw error;
 //   } finally {
 //     client.end();
 //   }
-}
+    }
 }
 
+async function testPosts() {
+  try {
+    console.log("5.  Testing Post Functions");
+    await createInitialPosts();
+    console.log("5.2 - Calling getAllposts from index.js");
+    const posts = await getAllposts();
+    console.log("GetAllposts Result:", posts);
+
+    console.log("5.3 - Calling updatePosts (post[0]) from index.js");
+    const updatePostResult = await updatePost(posts[0].id, {
+        title: "updated content",
+        content: "New update content "
+    });
+  console.log("updatePosts Result:", updatePostResult);
+  console.log("5.4 - Retrieving all posts by user with id #2 from index.js");
+  const userPosts = await getPostsByUser(2);
+  console.log("Posts by User #1:", userPosts)
+    console.log("####- Finished Testing Post Functions - #####");
+  } catch (error) {
+    console.error("Error testing db");
+    throw error;
+  }
+}
+async function createInitialPosts() {
+  try {
+    console.log("5.1 - Creating Initial Posts.");
+
+    const albert = await createPosts({
+      authorID: 1,
+      title: "first post",
+      content:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    });
+    const sandra = await createPosts({
+      authorID: 2,
+      title: "second post",
+      content:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    });
+    const glamgal = await createPosts({
+      authorID: 2,
+      title: "third post",
+      content:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    });
+  } catch (error) {
+    console.error("Error creating Posts!");
+    throw error;
+  }
+}
 //testDB();
 
 async function dropTables() {
     try{
-        console.log("starting to drop tables ...");
+        console.log("1. Droping Tables");
         await client.query(`DROP TABLE posts, users CASCADE;`);
-        console.log("Finished dropping tables.");
+        console.log("#### - Finished dropping tables. - ####");
 
     } catch (error) {
         console.error("Error dropping tables!");
@@ -65,7 +129,7 @@ async function dropTables() {
 
 async function createTableUsers() {
     try {
-        console.log("Creating 'user' table");
+        console.log("2.  Creating 'user' table");
       await client.query(`
       CREATE TABLE users (
         id SERIAL PRIMARY KEY,
@@ -76,7 +140,7 @@ async function createTableUsers() {
         active BOOLEAN DEFAULT true
       );
       `);
-      console.log("Finished creating 'user' table");
+      console.log("#### - Finished creating 'user' table - ####");
     } catch (error) {
         console.error("Error creating 'user'tables!");
         throw error;
@@ -85,7 +149,7 @@ async function createTableUsers() {
 
 async function createTablePosts() {
   try {
-    console.log("**** - Creating 'posts' table - ****");
+    console.log("3.  Creating 'posts' table");
     await client.query(`
       CREATE TABLE posts (
         id SERIAL PRIMARY KEY,
@@ -96,7 +160,7 @@ async function createTablePosts() {
       );
       `);
 
-    console.log("**** - Finished creating 'posts' table - ****");
+    console.log("#### - Finished creating 'posts' table - ####");
   } catch (error) {
     console.error("Error creating 'posts'tables!");
     throw error;
@@ -109,7 +173,7 @@ async function rebuildDB() {
         await dropTables();
         await createTableUsers();
         await createTablePosts();
-        await createInitialUsers();
+        
     } catch (error) {
         console.error(error);
         throw error;
@@ -117,6 +181,9 @@ async function rebuildDB() {
 }
 
 rebuildDB()
-    .then(testDB)
+    .then(testUsers)
+    .then(testPosts)
     .catch(console.error)
-    .finally(() => client.end());;
+    .finally(() => {
+        client.end();
+        console.log("FINISHED!!!!!!!!!")});
