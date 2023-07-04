@@ -116,13 +116,13 @@ async function updatePost(id, fields = {}) {
 }
 
 async function getPostsByUser(userID) {
-    console.log("Posts by User #", userID)
-    console.log(typeof userID)
+   // console.log("Posts by User #", userID)
+  //  console.log(typeof userID)
   let sql = `SELECT * FROM posts WHERE "authorID" = $1`
 
   try {
     const { rows } = await client.query(sql, [userID]);
-    console.log({ rows, line: 125 })
+  //  console.log({ rows, line: 125 })
     if (!rows.length) {
       //  console.log({rows, line: 125});
         return null
@@ -142,16 +142,12 @@ async function getUserbyID(userID) {
   try {
     const {rows: [users]} = await client.query(sql, [userID]);
 
-  console.log({ users, line: 144, userID, id: users.id});
     if (users){
-        console.log({ users, line: 146 })
         //delete the 'password' key
         delete users.password;        
-        //Get posts4
-        console.log("UserID:", userID);        
-        const userPosts = await getPostsByUser(userID);
+        //Get posts
+              const userPosts = await getPostsByUser(userID);
         // add posts to user objects
-        console.log("userPosts: ", userPosts)
         users.posts = userPosts; 
         return users;
      }

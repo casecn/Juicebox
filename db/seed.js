@@ -14,26 +14,24 @@ async function createInitialUsers() {
     try{
         console.log("4.1 - Populating initial users ");
 
-        const albert = await createUser ({
+        await createUser ({
             username: 'albert',
             password: 'bertie99',
             name: 'al Bert',
             location: 'Sidney, Australia' });
-        const sandra = await createUser({
+        await createUser({
             username: "sandra",
             password: "kdiekkdi",
             name: "Just Sandra",
             location: "Ain't tellin",
         });
-        
-        const glamgal = await createUser({
+        await createUser({
             username: "glamgal",
             password: "kljsldfj",
             name: "Jan",
             location: "Upper East Side",
         });
 
-        console.log(glamgal);
         console.log("#### - Finished Populating Users - ####")
     } catch(error) {
         console.error("Error creating users!");
@@ -63,9 +61,6 @@ async function testUsers() {
   } catch (error) {
         console.error("Error testing db");
         throw error;
-//   } finally {
-//     client.end();
-//   }
     }
 }
 
@@ -84,7 +79,7 @@ async function testPosts() {
     });
   console.log("updatePosts Result:", updatePostResult);
   console.log("5.4 - Retrieving all posts by user with id #2 from index.js");
-  const userPosts = await getPostsByUser(2);
+  const userPosts = await getPostsByUser(1);
   console.log("Posts by User #2:", userPosts)
     console.log("####- Finished Testing Post Functions - #####");
   } catch (error) {
@@ -119,7 +114,6 @@ async function createInitialPosts() {
     throw error;
   }
 }
-//testDB();
 
 async function dropTables() {
     try{
