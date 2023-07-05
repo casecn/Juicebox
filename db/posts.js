@@ -119,13 +119,37 @@ async function getAllposts() {
   return rows;
 }
 
+async function getPostbyID(postID) {
+
+  let sql = `
+        SELECT * FROM posts WHERE id = $1;`;
+  try {
+    const {
+      rows: [posts],
+    } = await client.query(sql, [postID]);
+
+    if (posts) {
+      //Get posts
+      //const postTags = await getTagsByPost(userID);
+      // add posts to user objects
+      //posts.tags = postTags;
+      return posts;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
 
 /**** Export Functions *******/
 module.exports = {
-    createTablePosts,
-    createInitialPosts,
-    createPosts,
-    updatePost,
-    getAllposts,
-    getPostsByUser,
+  createTablePosts,
+  createInitialPosts,
+  createPosts,
+  updatePost,
+  getAllposts,
+  getPostsByUser,
+  getPostbyID,
 };
