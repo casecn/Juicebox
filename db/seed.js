@@ -8,14 +8,20 @@ const {
 } = require("./users");
 
 const {
-    createTablePosts,
-    createInitialPosts,
-    updatePost,
-    getAllposts,
-    getPostsByUser,
+  createTablePosts,
+  createInitialPosts,
+  updatePost,
+  getAllposts,
+  getPostsByUser,
+  getPostbyID,
 } = require("./posts");
 
-const { createTableTags, createTablePost_Tags, createTag, } = require("./tags");
+const {
+  createTableTags,
+  createTablePost_Tags,
+  createTags,
+  getAllTags,
+} = require("./tags");
 
 async function testUsers() {
   try {
@@ -59,8 +65,13 @@ async function testPosts() {
     });
   console.log("updatePosts Result:", updatePostResult);
   console.log("5.4 - Retrieving all posts by user with id #2 from index.js");
-  const userPosts = await getPostsByUser(1);
+  const userPosts = await getPostsByUser(2);
   console.log("Posts by User #2:", userPosts)
+    console.log("5.5 - Retrieving a single post given postId #2");
+  const singlePost = await getPostbyID(2);
+  console.log("Single Post :", singlePost);
+
+
     console.log("####- Finished Testing Post Functions - #####");
   } catch (error) {
     console.error("Error testing db");
@@ -71,11 +82,13 @@ async function testPosts() {
 async function testTags() {
   try {
     console.log("6.  Testing Tag Functions");
-    const tags = await createTag(["#tag", "#othertag", "#moretag"]);
-    console.log("Tags Created:", tags);
-    // console.log("4.2 - Calling getAllusers from index.js");
-    // const users = await getAllUsers();
-    // console.log("#### - GetAllusers Result:", users);
+    let newTags = await createTags(["#tag", "#othertag", "#moretag"]);
+    console.log("6.1a - Tags Created:", newTags);
+    newTags = await createTags(["#anothertag", "#secondtry", "#oneMore", '#groovy', '#firstfriday']);
+    console.log("6.1b - Additional tags Created:", newTags);
+    console.log("6.2 - Calling getAllTags from tags.js");
+    const allTags = await getAllTags();
+    console.log("#### - GetAllTags Result:", allTags);
 
     // console.log("4.3 - Calling updateUser (users[0]) from index.js");
     // const updateUserResult = await updateUser(users[0].id, {
