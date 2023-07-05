@@ -1,5 +1,6 @@
 
 const { client } = require("./index");
+const { getPostTags } = require("./tags");
 
 /* Initialization Functions */
 async function createTablePosts() {
@@ -119,21 +120,19 @@ async function getAllposts() {
   return rows;
 }
 
-async function getPostbyID(postID) {
-
-  let sql = `
-        SELECT * FROM posts WHERE id = $1;`;
+async function getPostById(postID) {
+  let sql = `SELECT * FROM posts WHERE id = $1;`;
   try {
     const {
-      rows: [posts],
+      rows: [post],
     } = await client.query(sql, [postID]);
 
-    if (posts) {
-      //Get posts
-      //const postTags = await getTagsByPost(userID);
-      // add posts to user objects
+    if (post) {
+      //Get post tags
+      const postTags = await getPostTags(postID);
+      //add posts to user objects
       //posts.tags = postTags;
-      return posts;
+      return post;
     } else {
       return null;
     }
@@ -151,5 +150,5 @@ module.exports = {
   updatePost,
   getAllposts,
   getPostsByUser,
-  getPostbyID,
+  getPostById,
 };

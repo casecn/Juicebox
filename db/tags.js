@@ -23,8 +23,10 @@ async function createTablePost_Tags() {
     await client.query(
       `CREATE TABLE post_tags (
         id SERIAL PRIMARY KEY,
-        "postId" INTEGER REFERENCES posts(id) UNIQUE,
-        "tagId" INTEGER REFERENCES tags(id) UNIQUE);`
+        "postId" INTEGER REFERENCES posts(id) ,
+        "tagId" INTEGER REFERENCES tags(id),
+        UNIQUE("postId", "tagId")
+        );`
     );
     console.log("#### - Finished creating 'post_tags' table - ####");
   } catch (error) {
@@ -77,25 +79,25 @@ async function getAllTags() {
 }
 
 async function getPostTags(postID) {
-    const sql = `
+  const sql = `
     SELECT tags.* 
     FROM tags
     LEFT JOIN post_tags ON tags.id=post_tags."tagId"
-    WHERE post_tags."postId" = $1`
+    WHERE post_tags."postId" = $1`;
 
-try {
+  try {
     const { rows: tags } = await client.query(sql, [postID]);
-    if(!tags){
-        return null;
+    if (!tags) {
+      return null;
     }
     return tags;
-
-}
-
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 async function createPostTag(postId, tagId) {
-  
-    const sql = `INSERT INTO post_tags ("postId", "tagId")
+  const sql = `INSERT INTO post_tags ("postId", "tagId")
     VALUES ($1, $2) 
     ON CONFLICT ("postId", "tagId") DO NOTHING`;
   try {
@@ -107,17 +109,19 @@ async function createPostTag(postId, tagId) {
 }
 
 async function addTagsToPosts(postId, tagList) {
-    try {
-        const createPostTagPromises = tagList.map(
-            tag => createPostTag(postId, tag.id)
-        );
-        await Promise.all(createPostTagPromises);
+  try {
+    //add tag to tags table.  If already exists, then nothing.
+    const createPostTagPromises = tagList.map((tag) =>
+      createPostTag(postId, tag.id)
+    );
+    //waiting for all tags to be added.
+    await Promise.all(createPostTagPromises);
 
-        return getPostbyID(postId);
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
+    return getPostById(postId);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 /**** Export Functions *******/
 module.exports = {
@@ -125,5 +129,6 @@ module.exports = {
   createTablePost_Tags,
   createTags,
   getAllTags,
-  addTagsToPosts
+  addTagsToPosts,
+  getPostTags,
 };

@@ -1,10 +1,10 @@
 const { client } = require("./index");
 const {
-    createTableUsers,
-    createInitialUsers,
-    getAllUsers,
-    updateUser,
-    getUserbyID,
+  createTableUsers,
+  createInitialUsers,
+  getAllUsers,
+  updateUser,
+  getUserByID,
 } = require("./users");
 
 const {
@@ -13,7 +13,7 @@ const {
   updatePost,
   getAllposts,
   getPostsByUser,
-  getPostbyID,
+  getPostById,
 } = require("./posts");
 
 const {
@@ -21,6 +21,7 @@ const {
   createTablePost_Tags,
   createTags,
   getAllTags,
+  addTagsToPosts,
 } = require("./tags");
 
 async function testUsers() {
@@ -40,7 +41,7 @@ async function testUsers() {
 
     console.log("4.4 - Getting user data including posts");
 
-    const userData = await getUserbyID(1);
+    const userData = await getUserByID(1);
     console.log("User Data:", userData);
     console.log("####- Finished Testing User Functions - #####");
   } catch (error) {
@@ -68,7 +69,7 @@ async function testPosts() {
   const userPosts = await getPostsByUser(2);
   console.log("Posts by User #2:", userPosts)
     console.log("5.5 - Retrieving a single post given postId #2");
-  const singlePost = await getPostbyID(2);
+  const singlePost = await getPostById(2);
   console.log("Single Post :", singlePost);
 
 
@@ -84,22 +85,25 @@ async function testTags() {
     console.log("6.  Testing Tag Functions");
     let newTags = await createTags(["#tag", "#othertag", "#moretag"]);
     console.log("6.1a - Tags Created:", newTags);
-    newTags = await createTags(["#anothertag", "#secondtry", "#oneMore", '#groovy', '#firstfriday']);
+    newTags = await createTags([
+      "#anothertag",
+      "#secondtry",
+      "#oneMore",
+      "#groovy",
+      "#firstfriday",
+    ]);
     console.log("6.1b - Additional tags Created:", newTags);
     console.log("6.2 - Calling getAllTags from tags.js");
     const allTags = await getAllTags();
-    console.log("#### - GetAllTags Result:", allTags);
+    console.log("GetAllTags Result:", allTags);
 
-    // console.log("4.3 - Calling updateUser (users[0]) from index.js");
-    // const updateUserResult = await updateUser(users[0].id, {
-    //   name: "newname Sogood",
-    //   location: "Lesterville, KY",
-    // });
-    // console.log("updateUser Results: ", updateUserResult);
+    console.log("6.3 - Adding tags to post");
+    const updatedPost = await addTagsToPosts(2, [3, 4, 6]);
+    console.log("Update Post Results: ", updatedPost);
 
     // console.log("4.4 - Getting user data including posts");
 
-    // const userData = await getUserbyID(1);
+    // const userData = await getUserByID(1);
     // console.log("User Data:", userData);
     // console.log("####- Finished Testing User Functions - #####");
   } catch (error) {

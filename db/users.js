@@ -107,7 +107,7 @@ async function updateUser(id, fields = {}) {
     }
 }
 
-async function getUserbyID(userID) {
+async function getUserByID(userID) {
   let sql = `
         SELECT * FROM users WHERE id = $1;`;
   try {
@@ -137,5 +137,5 @@ async function getUserbyID(userID) {
     createInitialUsers,
     getAllUsers,
     updateUser,
-    getUserbyID,
+    getUserByID,
   };
