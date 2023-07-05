@@ -76,6 +76,23 @@ async function getAllTags() {
   return rows;
 }
 
+async function getPostTags(postID) {
+    const sql = `
+    SELECT tags.* 
+    FROM tags
+    LEFT JOIN post_tags ON tags.id=post_tags."tagId"
+    WHERE post_tags."postId" = $1`
+
+try {
+    const { rows: tags } = await client.query(sql, [postID]);
+    if(!tags){
+        return null;
+    }
+    return tags;
+
+}
+
+}
 async function createPostTag(postId, tagId) {
   
     const sql = `INSERT INTO post_tags ("postId", "tagId")
@@ -108,4 +125,5 @@ module.exports = {
   createTablePost_Tags,
   createTags,
   getAllTags,
+  addTagsToPosts
 };

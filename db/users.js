@@ -108,7 +108,6 @@ async function updateUser(id, fields = {}) {
 }
 
 async function getUserbyID(userID) {
-  console.log("Get User Info by User ID", userID);
   let sql = `
         SELECT * FROM users WHERE id = $1;`;
   try {
