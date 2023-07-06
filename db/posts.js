@@ -120,16 +120,16 @@ async function getAllposts() {
   return rows;
 }
 
-async function getPostById(postID) {
+async function getPostById(postId) {
   let sql = `SELECT * FROM posts WHERE id = $1;`;
   try {
     const {
       rows: [post],
-    } = await client.query(sql, [postID]);
+    } = await client.query(sql, [postId]);
 
     if (post) {
       //Get post tags
-      const postTags = await getPostTags(postID);
+      const postTags = await getPostTags(postId);
       //add posts to user objects
       //posts.tags = postTags;
       return post;

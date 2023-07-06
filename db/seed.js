@@ -6,7 +6,13 @@ const {
   updateUser,
   getUserByID,
 } = require("./users");
-
+const {
+  createTableTags,
+  createTablePost_Tags,
+  createTags,
+  getAllTags,
+  createPostTag,
+} = require("./tags");
 const {
   createTablePosts,
   createInitialPosts,
@@ -16,14 +22,20 @@ const {
   getPostById,
 } = require("./posts");
 
-const {
-  createTableTags,
-  createTablePost_Tags,
-  createTags,
-  getAllTags,
-  addTagsToPosts,
-} = require("./tags");
 
+async function addTagsToPost(postId, tagList) {
+  try {
+    const createPostTagPromises = tagList.map((tag) =>
+      createPostTag(postId, tag)
+    );
+
+    await Promise.all(createPostTagPromises);
+
+    return await getPostById(postId);
+  } catch (error) {
+    throw error;
+  }
+}
 async function testUsers() {
   try {
     console.log("4.  Testing User Functions")
@@ -98,7 +110,7 @@ async function testTags() {
     console.log("GetAllTags Result:", allTags);
 
     console.log("6.3 - Adding tags to post");
-    const updatedPost = await addTagsToPosts(2, [3, 4, 6]);
+    const updatedPost = await addTagsToPost(2, [3, 4, 6]);
     console.log("Update Post Results: ", updatedPost);
 
     // console.log("4.4 - Getting user data including posts");

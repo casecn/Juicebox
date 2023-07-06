@@ -1,4 +1,5 @@
 const { client } = require("./index");
+
 const { getPostById } = require("./posts");
 
 async function createTableTags() {
@@ -96,39 +97,27 @@ async function getPostTags(postID) {
     throw error;
   }
 }
-async function createPostTag(postId, tagId) {
+async function createPostTag(postId, tagID) {
   const sql = `INSERT INTO post_tags ("postId", "tagId")
     VALUES ($1, $2) 
     ON CONFLICT ("postId", "tagId") DO NOTHING`;
   try {
-    await client.query(sql, [postId, tagId]);
+    await client.query(sql, [postId, tagID]);
   } catch (error) {
     console.error(error);
     throw error;
   }
+
 }
 
-async function addTagsToPosts(postId, tagList) {
-  try {
-    //add tag to tags table.  If already exists, then nothing.
-    const createPostTagPromises = tagList.map((tag) =>
-      createPostTag(postId, tag.id)
-    );
-    //waiting for all tags to be added.
-    await Promise.all(createPostTagPromises);
 
-    return getPostById(postId);
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
-}
 /**** Export Functions *******/
 module.exports = {
   createTableTags,
   createTablePost_Tags,
   createTags,
   getAllTags,
-  addTagsToPosts,
+  createPostTag,
   getPostTags,
 };
+//addTagsToPost,
