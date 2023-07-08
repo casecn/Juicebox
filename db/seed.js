@@ -11,19 +11,41 @@ const {
   createTablePost_Tags,
   createTags,
   getAllTags,
-  createPostTag,
+  
 } = require("./tags");
 const {
   createTablePosts,
   createInitialPosts,
   updatePost,
-  getAllposts,
+  getAllPosts,
   getPostsByUser,
-  //getPostById,
+  getPostById,//circular error when included.
   addTagsToPost,
 } = require("./posts");
 
+async function createInitialTags() {
+  try {
+    console.log("Starting to create tags...");
 
+    const [happy, sad, inspo, catman] = await createTags([
+      "#happy",
+      "#worst-day-ever",
+      "#youcandoanything",
+      "#catmandoeverything",
+    ]);
+
+    const [postOne, postTwo, postThree] = await getAllPosts();
+
+    await addTagsToPost(postOne.id, [happy, inspo]);
+    await addTagsToPost(postTwo.id, [sad, inspo]);
+    await addTagsToPost(postThree.id, [happy, catman, inspo]);
+
+    console.log("Finished creating tags!");
+  } catch (error) {
+    console.log("Error creating tags!");
+    throw error;
+  }
+}
 
 async function testUsers() {
   try {
@@ -54,10 +76,10 @@ async function testUsers() {
 
 async function testPosts() {
   try {
-    console.log('5.  Testing Post Functions', 'color: orange; font-weight: bold');
+    console.log('5.  Testing Post Functions');
     
     console.log("5.2 - Calling getAllposts from index.js");
-    const posts = await getAllposts();
+    const posts = await getAllPosts();
     console.log("GetAllposts Result:", posts);
 
     console.log("5.3 - Calling updatePosts (post[0]) from index.js");
@@ -65,12 +87,18 @@ async function testPosts() {
         title: "updated content",
         content: "New update content "
     });
-  console.log("updatePosts Result:", updatePostResult);
+    console.log("updatePosts Result:", updatePostResult);
+    console.log("5.3b - Calling updatePosts (post[1]), only updating tags");
+    const updatePostTagsResult = await updatePost(posts[2].id, {
+      tags: ["#yourcandoanything", "#redfish", "#bluefix"]
+    });
+    console.log("updatePosts Result:", updatePostTagsResult);
+  
   console.log("5.4 - Retrieving all posts by user with id #2 from index.js");
   const userPosts = await getPostsByUser(2);
   console.log("Posts by User #2:", userPosts)
     console.log("5.5 - Retrieving a single post given postId #2");
-  //const singlePost = await getPostById(2);
+  const singlePost = await getPostById(2);
   console.log("Single Post :", singlePost);
 
 
@@ -144,6 +172,7 @@ async function rebuildDB() {
       //Populate initial data
       await createInitialUsers();
       await createInitialPosts();
+      
     } catch (error) {
         console.error(error);
         throw error;
@@ -151,8 +180,8 @@ async function rebuildDB() {
 }
 
 rebuildDB()
-  //.then(testUsers)
-  //.then(testPosts)
+  .then(testUsers)
+  .then(testPosts)
   //.then(testTags)
   .catch(console.error)
   .finally(() => client.end());
