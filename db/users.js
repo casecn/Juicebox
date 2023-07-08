@@ -7,10 +7,13 @@ async function createTableUsers() {
   try {
     console.log("2.  Creating 'user' table");
     await client.query(`CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  username varchar(255) UNIQUE NOT NULL,
-  password varchar(255) NOT NULL
-);
+        id SERIAL PRIMARY KEY,
+        username varchar(255) UNIQUE NOT NULL,
+        password varchar(255) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        location VARCHAR(255) NOT NULL,
+        active BOOLEAN DEFAULT true
+    );
       `);
     // username varchar(255) UNIQUE NOT NULL,
     // password varchar(255) NOT NULL,
@@ -72,7 +75,7 @@ async function createUser({
     location }) {
         let sql = `INSERT INTO users (username, password, name, location) VALUES ($1, $2, $3, $4)
         ON CONFLICT (username) DO NOTHING
-        RETURNING id, username, name, location, active;
+        ;
         `;
         data = [username, password, name, location];
         //console.log(data);
@@ -82,7 +85,7 @@ async function createUser({
     } catch (error) {
         throw error;
     }
-}
+}//RETURNING id, username, name, location, active
 
 async function updateUser(id, fields = {}) {
     const setString = Object.keys(fields).map((key, index) => `"${ key }"=$${ index +1 }`

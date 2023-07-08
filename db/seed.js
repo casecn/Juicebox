@@ -136,14 +136,14 @@ async function rebuildDB() {
       await dropTables();
      await createTableUsers();
 
-      // await createTableTags();
-      // await createTablePosts();
-      // await createTablePost_Tags();
+      await createTableTags();
+      await createTablePosts();
+      await createTablePost_Tags();
       
 
       //Populate initial data
-      //await createInitialUsers();
-      //await createInitialPosts();
+      await createInitialUsers();
+      await createInitialPosts();
     } catch (error) {
         console.error(error);
         throw error;
@@ -157,6 +157,6 @@ rebuildDB()
   .catch(console.error)
   .finally(() => client.end());
 
-  module.exports = {
-    dropTables,
-  };
+  // module.exports = {
+  //   dropTables,
+  // };

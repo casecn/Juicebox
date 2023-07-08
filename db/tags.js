@@ -49,14 +49,15 @@ async function createTags(tagData) {
   let sql = `INSERT INTO tags(name)
     VALUES ${placeHolderString} 
     ON CONFLICT (name) DO NOTHING RETURNING *`;
-
+    
   let selectSQL = `Select * from tags WHERE name IN (${placeHolderString})`;
 
   try {
     const { rows } = await client.query(sql, tagData);
     if (!rows.length) {
-      return null;
+      return [];
     }
+    
     try {
       const { rows } = await client.query(selectSQL, tagData);
       if (!rows) {
@@ -98,21 +99,17 @@ async function getPostTags(postID) {
   }
 }
 
-
 async function createPostTag(postId, tagID) {
-    console.log("CREATEPOSTTAG: ", tagID)
   const sql = `INSERT INTO post_tags ("postId", "tagId")
     VALUES ($1, $2) 
     ON CONFLICT ("postId", "tagId") DO NOTHING`;
   try {
-    await client.query(sql, [postId, tagID]);
+    await client.query(sql, [postId, tagID.id]);
   } catch (error) {
     console.error(error);
     throw error;
   }
-
 }
-
 
 /**** Export Functions *******/
 module.exports = {

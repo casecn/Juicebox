@@ -26,27 +26,30 @@ async function createInitialPosts() {
   try {
     console.log("5.1 - Creating Initial Posts.");
 
-    const albert = await createPosts({
+    await createPost({
       authorID: 1,
       title: "first post",
       content:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
         tags: ["#happy", "#youcandoanything"]});
     console.log("passed #1")
+    
     await createPost({
-      authorId: 2,
+      authorID: 2,
       title: "First Post",
       content:
         "This is my first post. I hope I love writing blogs as much as I love writing them.",
       tags: ["#happy", "#youcandoanything"],
     });
+    console.log("passed #2");
     await createPost({
       authorID: 2,
       title: "second post",
       content:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      tags: ["#happy", "#youcandoanything"],
+      tags: ["#sad", "#firsttag"],
     });
+     console.log("passed #3");
     await createPost({
       authorID: 2,
       title: "third post",
@@ -54,6 +57,7 @@ async function createInitialPosts() {
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
       tags: ["#happy", "#youcandoanything"],
     });
+    console.log("passed #4");
   } catch (error) {
     console.error("Error creating Posts!");
     throw error;
@@ -62,13 +66,14 @@ async function createInitialPosts() {
 
 /**** Posts Functions ****/
 async function createPost({ authorID, title, content, tags = [] }) {
-    console.log("AuthorID:", authorID, "Title:", title, "Content:", content, "Tags:", tags)
+    //console.log("AuthorID:", authorID, "Title:", title, "Content:", content, "Tags:", tags)
     const sql = 'INSERT INTO posts (\"authorID\", title, content) VALUES ($1, $2, $3) RETURNING *'
     const data = [authorID, title, content]
-
+    
     try {
     const { rows: [posts], } = await client.query(sql, data);
-
+        // console.log("CREATING TAGS !!!!");
+        // console.log("These are my tags", tags)
     const tagList = await createTags(tags);
 
     return await addTagsToPost(posts.id, tagList);
@@ -174,14 +179,14 @@ async function getPostById(postId) {
 }
 async function addTagsToPost(postId, tagList) {
   try {
-    console.log(tagList)
+    //console.log(tagList)
     const createPostTagPromises = tagList.map((tag) =>
       createPostTag(postId, tag)
     );
 
     await Promise.all(createPostTagPromises);
 
-    return await getPostById(postId);
+    //return await getPostById(postId);
   } catch (error) {
     throw error;
   }
