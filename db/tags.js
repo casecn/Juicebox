@@ -24,8 +24,8 @@ async function createTablePost_Tags() {
     await client.query(
       `CREATE TABLE post_tags (
         id SERIAL PRIMARY KEY,
-        "postId" INTEGER REFERENCES posts(id) ,
-        "tagId" INTEGER REFERENCES tags(id),
+        "postId" INTEGER REFERENCES posts(id), 
+        "tagId" INTEGER REFERENCES tags(id) ,
         UNIQUE("postId", "tagId")
         );`
     );
@@ -97,7 +97,10 @@ async function getPostTags(postID) {
     throw error;
   }
 }
+
+
 async function createPostTag(postId, tagID) {
+    console.log("CREATEPOSTTAG: ", tagID)
   const sql = `INSERT INTO post_tags ("postId", "tagId")
     VALUES ($1, $2) 
     ON CONFLICT ("postId", "tagId") DO NOTHING`;
@@ -120,4 +123,3 @@ module.exports = {
   createPostTag,
   getPostTags,
 };
-//addTagsToPost,

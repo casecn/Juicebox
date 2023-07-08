@@ -1,6 +1,6 @@
 
 const { client } = require("./index");
-const { getPostTags } = require("./tags");
+const { getPostTags, createTags, createPostTag } = require("./tags");
 
 /* Initialization Functions */
 async function createTablePosts() {
@@ -31,18 +31,28 @@ async function createInitialPosts() {
       title: "first post",
       content:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        tags: ["#happy", "#youcandoanything"]});
+    console.log("passed #1")
+    await createPost({
+      authorId: 2,
+      title: "First Post",
+      content:
+        "This is my first post. I hope I love writing blogs as much as I love writing them.",
+      tags: ["#happy", "#youcandoanything"],
     });
-    const sandra = await createPosts({
+    await createPost({
       authorID: 2,
       title: "second post",
       content:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      tags: ["#happy", "#youcandoanything"],
     });
-    const glamgal = await createPosts({
+    await createPost({
       authorID: 2,
       title: "third post",
       content:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      tags: ["#happy", "#youcandoanything"],
     });
   } catch (error) {
     console.error("Error creating Posts!");
@@ -51,14 +61,17 @@ async function createInitialPosts() {
 }
 
 /**** Posts Functions ****/
-async function createPosts({ authorID, title, content }) {
-    //console.log("AuthorID:", authorID, "Title:", title, "Content:", content)
+async function createPost({ authorID, title, content, tags = [] }) {
+    console.log("AuthorID:", authorID, "Title:", title, "Content:", content, "Tags:", tags)
     const sql = 'INSERT INTO posts (\"authorID\", title, content) VALUES ($1, $2, $3) RETURNING *'
     const data = [authorID, title, content]
-    //console.log(data);
+
     try {
     const { rows: [posts], } = await client.query(sql, data);
-    return posts;
+
+    const tagList = await createTags(tags);
+
+    return await addTagsToPost(posts.id, tagList);
   } catch (error) {
     console.error(error);
     throw error;
@@ -66,19 +79,21 @@ async function createPosts({ authorID, title, content }) {
 }
 
 async function getPostsByUser(userID) {
-  // console.log("Posts by User #", userID)
+   //console.log("Posts by User #", userID)
   //  console.log(typeof userID)
-  let sql = `SELECT * FROM posts WHERE "authorID" = $1`;
+  let sql = `SELECT id FROM posts WHERE "authorID" = $1`;
 
   try {
-    const { rows } = await client.query(sql, [userID]);
-    //  console.log({ rows, line: 125 })
-    if (!rows.length) {
-      //  console.log({rows, line: 125});
+    const { rows: postIds } = await client.query(sql, [userID]);
+      console.log({ rows, line: 125 })
+    if (!postIds.length) {
+       console.log({rows, line: 125});
       return null;
     }
-    //console.log({rows, line: 129})
-    return rows;
+     const posts = await Promise.all(postIds.map(
+        post => getPostById( post.id )
+     ));
+    return posts;
   } catch (error) {
     console.error(error);
     throw error;
@@ -116,22 +131,38 @@ async function updatePost(id, fields = {}) {
 }
 
 async function getAllposts() {
-  const { rows } = await client.query(`SELECT * FROM posts;`);
-  return rows;
+  try {
+    const { rows: postIds } = await client.query(`SELECT id FROM posts;`);
+  const posts = await Promise.all(postIds.map(
+    post => getPostById ( post.id )
+  ));
+  return posts;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 async function getPostById(postId) {
   let sql = `SELECT * FROM posts WHERE id = $1;`;
   try {
-    const {
-      rows: [post],
-    } = await client.query(sql, [postId]);
+    //get the post it's self
+    const { rows: [post], } = await client.query(sql, [postId]);
 
     if (post) {
-      //Get post tags
+      //grab the author info
+          const { rows: [author] } = await client.query(
+            `SELECT username, name, location
+            FROM users
+            WHERE id=$1;`,
+            [post.authorID]);
+      //add author info to post object
+      post.author = author;
+      //Get tags 
       const postTags = await getPostTags(postId);
-      //add posts to user objects
-      //posts.tags = postTags;
+      //add tags to the post object.
+      post.tags = postTags;
+      delete post.authorID;
       return post;
     } else {
       return null;
@@ -141,14 +172,28 @@ async function getPostById(postId) {
     throw error;
   }
 }
+async function addTagsToPost(postId, tagList) {
+  try {
+    console.log(tagList)
+    const createPostTagPromises = tagList.map((tag) =>
+      createPostTag(postId, tag)
+    );
 
+    await Promise.all(createPostTagPromises);
+
+    return await getPostById(postId);
+  } catch (error) {
+    throw error;
+  }
+}
 /**** Export Functions *******/
 module.exports = {
   createTablePosts,
   createInitialPosts,
-  createPosts,
+  createPost,
   updatePost,
   getAllposts,
   getPostsByUser,
-  getPostById,
+  //getPostById,
+  addTagsToPost,
 };

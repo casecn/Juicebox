@@ -6,16 +6,17 @@ const { getPostsByUser } = require("./posts");
 async function createTableUsers() {
   try {
     console.log("2.  Creating 'user' table");
-    await client.query(`
-      CREATE TABLE users (
-        id SERIAL PRIMARY KEY,
-        username varchar(255) UNIQUE NOT NULL,
-        password varchar(255) NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        location VARCHAR(255) NOT NULL,
-        active BOOLEAN DEFAULT true
-      );
+    await client.query(`CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username varchar(255) UNIQUE NOT NULL,
+  password varchar(255) NOT NULL
+);
       `);
+    // username varchar(255) UNIQUE NOT NULL,
+    // password varchar(255) NOT NULL,
+    // name VARCHAR(255) NOT NULL,
+    // location VARCHAR(255) NOT NULL,
+    // active BOOLEAN DEFAULT true
     console.log("#### - Finished creating 'user' table - ####");
   } catch (error) {
     console.error("Error creating 'user'tables!");
