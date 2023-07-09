@@ -1,7 +1,5 @@
 const { client } = require("./index");
 
-const { getPostById } = require("./posts");
-
 async function createTableTags() {
   try {
     console.log("3.1  Creating 'tags' table");
@@ -35,29 +33,7 @@ async function createTablePost_Tags() {
     throw error;
   }
 }
-async function createInitialTags() {
-  try {
-    console.log("Starting to create tags...");
 
-    const [happy, sad, inspo, catman] = await createTags([
-      "#happy",
-      "#worst-day-ever",
-      "#youcandoanything",
-      "#catmandoeverything",
-    ]);
-
-    const [postOne, postTwo, postThree] = await getAllPosts();
-
-    await addTagsToPost(postOne.id, [happy, inspo]);
-    await addTagsToPost(postTwo.id, [sad, inspo]);
-    await addTagsToPost(postThree.id, [happy, catman, inspo]);
-
-    console.log("Finished creating tags!");
-  } catch (error) {
-    console.log("Error creating tags!");
-    throw error;
-  }
-}
 /**** Functions *******/
 async function createTags(tagData) {
   let insertResults = [];
@@ -123,11 +99,11 @@ async function getPostTags(postID) {
 }
 
 async function createPostTag(postId, tagID) {
-  const sql = `INSERT INTO post_tags ("postId", "tagId")
-    VALUES ($1, $2) 
-    ON CONFLICT ("postId", "tagId") DO NOTHING`;
+  const sql = `INSERT INTO post_tags("postId", "tagId")
+    VALUES ($1, $2)
+ON CONFLICT ("postId", "tagId") DO NOTHING;`;
   try {
-    await client.query(sql, [postId, tagID.id]);
+     await client.query(sql, [postId, tagID.id]);
   } catch (error) {
     console.error(error);
     throw error;
@@ -142,5 +118,5 @@ module.exports = {
   getAllTags,
   createPostTag,
   getPostTags,
-  createInitialTags,
+ 
 };

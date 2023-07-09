@@ -19,33 +19,10 @@ const {
   updatePost,
   getAllPosts,
   getPostsByUser,
-  getPostById,//circular error when included.
+  getPostById, 
   addTagsToPost,
+  getPostsByTagName,
 } = require("./posts");
-
-async function createInitialTags() {
-  try {
-    console.log("Starting to create tags...");
-
-    const [happy, sad, inspo, catman] = await createTags([
-      "#happy",
-      "#worst-day-ever",
-      "#youcandoanything",
-      "#catmandoeverything",
-    ]);
-
-    const [postOne, postTwo, postThree] = await getAllPosts();
-
-    await addTagsToPost(postOne.id, [happy, inspo]);
-    await addTagsToPost(postTwo.id, [sad, inspo]);
-    await addTagsToPost(postThree.id, [happy, catman, inspo]);
-
-    console.log("Finished creating tags!");
-  } catch (error) {
-    console.log("Error creating tags!");
-    throw error;
-  }
-}
 
 async function testUsers() {
   try {
@@ -80,10 +57,11 @@ async function testPosts() {
     
     console.log("5.2 - Calling getAllposts from index.js");
     const posts = await getAllPosts();
-    console.log("GetAllposts Result:", posts);
+    console.log("SEED - GetAllposts Result:", posts);
 
-    console.log("5.3 - Calling updatePosts (post[0]) from index.js");
-    const updatePostResult = await updatePost(posts[0].id, {
+    console.log("5.3 - Calling updatePosts (post[1]) from index.js");
+
+    const updatePostResult = await updatePost(posts[1].id, {
         title: "updated content",
         content: "New update content "
     });
@@ -101,6 +79,9 @@ async function testPosts() {
   const singlePost = await getPostById(2);
   console.log("Single Post :", singlePost);
 
+  console.log ("5.6 - Calling getPostsbyTagName with #happy");
+  const postsWithHappy = await getPostsByTagName("#happy");
+  console.log("getPostsbyTagName Result:", postsWithHappy);
 
     console.log("####- Finished Testing Post Functions - #####");
   } catch (error) {
@@ -156,22 +137,31 @@ async function dropTables() {
         throw error;
     }
 }
+async function testPosts() {
+//  console.log("5.4 - Retrieving all posts by user with id #2 from index.js");
+//  const userPosts = await getPostsByUser(2);
+//  console.log("Posts by User #2:", userPosts);
 
+  console.log("5.6 - Calling getPostsbyTagName with #happy");
+  const postsWithHappy = await getPostsByTagName("#happy");
+  console.log("getPostsbyTagName Result:", postsWithHappy);
+
+}
 async function rebuildDB() {
     try {
       client.connect();
+      await testPosts();
+    //   await dropTables();
+    //  await createTableUsers();
 
-      await dropTables();
-     await createTableUsers();
-
-      await createTableTags();
-      await createTablePosts();
-      await createTablePost_Tags();
+    //   await createTableTags();
+    //   await createTablePosts();
+    //   await createTablePost_Tags();
       
 
-      //Populate initial data
-      await createInitialUsers();
-      await createInitialPosts();
+    //   //Populate initial data
+    //   await createInitialUsers();
+    //   await createInitialPosts();
       
     } catch (error) {
         console.error(error);
@@ -180,9 +170,9 @@ async function rebuildDB() {
 }
 
 rebuildDB()
-  .then(testUsers)
-  .then(testPosts)
-  //.then(testTags)
+  // .then(testUsers)
+  // .then(testPosts)
+  // .then(testTags)
   .catch(console.error)
   .finally(() => client.end());
 

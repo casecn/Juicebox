@@ -39,11 +39,11 @@ async function createInitialPosts() {
       title: "First Post",
       content:
         "This is my first post. I hope I love writing blogs as much as I love writing them.",
-      tags: ["#happy", "#youcandoanything"],
+      tags: ["#happy", "#youcantdoanything"],
     });
     console.log("passed #2");
     await createPost({
-      authorID: 2,
+      authorID: 3,
       title: "second post",
       content:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
@@ -95,18 +95,33 @@ async function getPostsByUser(userID) {
     const { rows: postIds } = await client.query(sql, [userID]);
 
     if (!postIds.length) {
-      console.log({ rows, line: 125 });
       return null;
     }
-    const posts = await Promise.all(
-      postIds.map((post) => getPostById(post.id))
-    );
+const posts = await Promise.all(postIds.map((post) => getPostById(post.id)));
     return posts;
   } catch (error) {
     console.error(error);
     throw error;
   }
 }
+
+async function getPostsByTagName(tagName) {
+    try{
+        let sql = `SELECT posts.id FROM posts
+        JOIN post_tags ON posts.id=post_tags."postId"
+        JOIN tags on tags.id=post_tags."tagId"
+        WHERE tags.name = $1;`
+        const { rows: postIds } = await client.query(sql , [tagName]);
+        //somehow tags are being lost coming throug the following line.
+   const posts = await Promise.all(postIds.map((post) => getPostById(post.id)));
+        // console.log("TEMP: ", temp)
+        return posts;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
+
 
 async function updatePost(postId, fields = {}) {
   const { tags } = fields;
@@ -148,6 +163,7 @@ async function updatePost(postId, fields = {}) {
 async function getAllPosts() {
   try {
     const { rows: postIds } = await client.query(`SELECT id FROM posts;`);
+    
     const posts = await Promise.all(
       postIds.map((post) => getPostById(post.id))
     );
@@ -159,34 +175,29 @@ async function getAllPosts() {
 }
 
 async function getPostById(postId) {
-  let sql = `SELECT * FROM posts WHERE id = $1;`;
+  //console.log("GETPOSTSBYID:", postId)
   try {
     //get the post it's self
-    const {
-      rows: [post],
-    } = await client.query(sql, [postId]);
-
-    if (post) {
+    let sql = `SELECT * FROM posts WHERE id = $1;`;
+    const { rows: [post], } = await client.query(sql, [postId]);
+   // console.log("GETPOSTSBYID-POST:", post);
       //grab the author info
-      const {
-        rows: [author],
-      } = await client.query(
-        `SELECT username, name, location
+      
+      sql = `SELECT username, name, location
             FROM users
-            WHERE id=$1;`,
-        [post.authorID]
-      );
+            WHERE id=$1;`;
+      const { rows: [author], } = await client.query( sql, [post.authorID]);
       //add author info to post object
       post.author = author;
       //Get tags
       const postTags = await getPostTags(postId);
+      console.log("GETPOSTSBYID-POST_TAGS:", postTags);
       //add tags to the post object.
       post.tags = postTags;
+      console.log("GETPOSTSBYID-POST_TAGS_POSTS:", post);
       delete post.authorID;
       return post;
-    } else {
-      return null;
-    }
+    
   } catch (error) {
     console.error(error);
     throw error;
@@ -201,7 +212,7 @@ async function addTagsToPost(postId, tagList) {
 
     await Promise.all(createPostTagPromises);
 
-    //return await getPostById(postId);
+    return await getPostById(postId);
   } catch (error) {
     throw error;
   }
@@ -214,6 +225,7 @@ module.exports = {
   updatePost,
   getAllPosts,
   getPostsByUser,
-  //getPostById,
+  getPostById,
   addTagsToPost,
+  getPostsByTagName,
 };
