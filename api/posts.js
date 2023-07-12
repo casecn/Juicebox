@@ -3,7 +3,7 @@ const postsRouter = express.Router(); //define router
 const { getAllPosts } = require("../db");
 
 postsRouter.use((req, res, next) => {
-  console.log("A request is bing made to /posts");
+  console.log("A request is being made to /posts");
 
   next();
 });
