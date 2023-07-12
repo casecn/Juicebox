@@ -97,7 +97,9 @@ async function getPostsByUser(userID) {
     if (!postIds.length) {
       return null;
     }
-const posts = await Promise.all(postIds.map((post) => getPostById(post.id)));
+    const posts = await Promise.all(
+      postIds.map((post) => getPostById(post.id))
+    );
     return posts;
   } catch (error) {
     console.error(error);
@@ -112,9 +114,9 @@ async function getPostsByTagName(tagName) {
         JOIN tags on tags.id=post_tags."tagId"
         WHERE tags.name = $1;`
         const { rows: postIds } = await client.query(sql , [tagName]);
-        //somehow tags are being lost coming throug the following line.
+        //somehow tags are being lost coming through the following line.
    const posts = await Promise.all(postIds.map((post) => getPostById(post.id)));
-        // console.log("TEMP: ", temp)
+        // console.log("TEMP: ", posts)
         return posts;
     } catch (error) {
         console.log(error);
