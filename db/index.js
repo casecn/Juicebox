@@ -334,10 +334,10 @@ async function getPostById(postId) {
       post.author = author;
       //Get tags
       const postTags = await getPostTags(postId);
-      console.log("GETPOSTSBYID-POST_TAGS:", postTags);
+      //console.log("GETPOSTSBYID-POST_TAGS:", postTags);
       //add tags to the post object.
       post.tags = postTags;
-      console.log("GETPOSTSBYID-POST_TAGS_POSTS:", post);
+      //console.log("GETPOSTSBYID-POST_TAGS_POSTS:", post);
       delete post.authorID;
       return post;
     
@@ -472,9 +472,6 @@ ON CONFLICT ("postId", "tagId") DO NOTHING;`;
     throw error;
   }
 }
-
-
-
 
 /**** Export Functions *******/
 module.exports = {
