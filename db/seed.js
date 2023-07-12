@@ -1,28 +1,50 @@
-const { client } = require("./index");
 const {
+  client,
   createTableUsers,
   createInitialUsers,
   getAllUsers,
   updateUser,
   getUserByID,
-} = require("./users");
-const {
+  createTablePosts,
+  createInitialPosts,
+  createPost,
+  updatePost,
+  getAllPosts,
+  getPostsByUser,
+  getPostById,
+  addTagsToPost,
+  getPostsByTagName,
   createTableTags,
   createTablePost_Tags,
   createTags,
   getAllTags,
+  createPostTag,
+  getPostTags,
+} = require("./index");
+// const {
+//   createTableUsers,
+//   createInitialUsers,
+//   getAllUsers,
+//   updateUser,
+//   getUserByID,
+// } = require("./users");
+// const {
+//   createTableTags,
+//   createTablePost_Tags,
+//   createTags,
+//   getAllTags,
   
-} = require("./tags");
-const {
-  createTablePosts,
-  createInitialPosts,
-  updatePost,
-  getAllPosts,
-  getPostsByUser,
-  getPostById, 
-  addTagsToPost,
-  getPostsByTagName,
-} = require("./posts");
+// } = require("./tags");
+// const {
+//   createTablePosts,
+//   createInitialPosts,
+//   updatePost,
+//   getAllPosts,
+//   getPostsByUser,
+//   getPostById, 
+//   addTagsToPost,
+//   getPostsByTagName,
+// } = require("./posts");
 
 async function testUsers() {
   try {
@@ -151,17 +173,17 @@ async function rebuildDB() {
     try {
       client.connect();
       await testPosts();
-    //   await dropTables();
-    //  await createTableUsers();
+      await dropTables();
+      await createTableUsers();
 
-    //   await createTableTags();
-    //   await createTablePosts();
-    //   await createTablePost_Tags();
+      await createTableTags();
+      await createTablePosts();
+      await createTablePost_Tags();
       
 
     //   //Populate initial data
-    //   await createInitialUsers();
-    //   await createInitialPosts();
+      await createInitialUsers();
+      await createInitialPosts();
       
     } catch (error) {
         console.error(error);
@@ -170,9 +192,9 @@ async function rebuildDB() {
 }
 
 rebuildDB()
-  // .then(testUsers)
-  // .then(testPosts)
-  // .then(testTags)
+   .then(testUsers)
+   .then(testPosts)
+   .then(testTags)
   .catch(console.error)
   .finally(() => client.end());
 
