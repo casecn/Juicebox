@@ -11,7 +11,7 @@ postsRouter.use((req, res, next) => {
 postsRouter.get("/", async (req, res) => {
 
   const posts = await getAllPosts();
-  res.send([ posts ]);
+  res.send( posts );
 });
 
 module.exports = postsRouter;
